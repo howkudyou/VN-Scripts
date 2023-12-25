@@ -1,5 +1,10 @@
-from PIL import Image, ImageDraw
+#!/usr/bin/python
+
+import sys
 import json
+import shutil
+from PIL import Image, ImageDraw
+from zipfile import ZipFile
 
 def rebuild_sprite(json_data, texture_path):
     canvas_width = json_data["Canvas"]["Width"]
@@ -32,8 +37,22 @@ def rebuild_sprite(json_data, texture_path):
 
     return sprite
 
-with open(f'atlas.json', "r") as json_file:
-    json_data = json.load(json_file)
+#with open(f'atlas.json', "r") as json_file:
+#    json_data = json.load(json_file)
 
-resulting_sprite = rebuild_sprite(json_data, f"tex0.png")
-resulting_sprite.save("sprite.png", "PNG")
+#resulting_sprite = rebuild_sprite(json_data, f"tex0.png")
+#resulting_sprite.save("sprite.png", "PNG")
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("> Usage: python atlas_to_png.py <file>")
+        exit(1)
+    file = sys.argv[1]
+    with ZipFile(file, 'r') as zip_ref:
+        zip_ref.extractall('temp')
+    with open(f'temp/atlas.json', "r") as json_file:
+        json_data = json.load(json_file)
+    sprite = rebuild_sprite(json_data, f"temp/tex0.png")
+    sprite.save(f'{file.replace(".atx", ".png")}', "PNG")
+    shutil.rmtree('temp')
+    print(f'> Reconstructed CG saved as {file.replace(".atx", ".png")}')
