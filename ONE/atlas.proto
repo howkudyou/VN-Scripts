@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+message Canvas {
+  int32 Width = 1;
+  int32 Height = 2;
+}
+
+message Mesh {
+  int32 texNo = 1;
+  float offsetX = 2;
+  float offsetY = 3;
+  float srcOffsetX = 4;
+  float srcOffsetY = 5;
+  float texU1 = 6;
+  float texV1 = 7;
+  float texU2 = 8;
+  float texV2 = 9;
+  float viewX = 10;
+  float viewY = 11;
+  float width = 12;
+  float height = 13;
+}
+
+message Attribute {
+  int32 id = 1;
+  int32 x = 2;
+  int32 y = 3;
+  int32 width = 4;
+  int32 height = 5;
+  int32 color = 6;
+}
+
+message Block {
+  string filename = 1;
+  string filenameOld = 2;
+  string blend = 3;
+  int32 id = 4;
+  float anchorX = 5;
+  float anchorY = 6;
+  float width = 7;
+  float height = 8;
+  float offsetX = 9;
+  float offsetY = 10;
+  int32 priority = 11;
+  repeated Mesh Mesh = 12;
+  repeated Attribute Attribute = 13;
+}
+
+message Atlas {
+  Canvas Canvas = 1;
+  repeated Block Block = 2;
+}
