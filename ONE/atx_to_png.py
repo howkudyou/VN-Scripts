@@ -37,12 +37,6 @@ def rebuild_sprite(json_data, texture_path):
 
     return sprite
 
-#with open(f'atlas.json', "r") as json_file:
-#    json_data = json.load(json_file)
-
-#resulting_sprite = rebuild_sprite(json_data, f"tex0.png")
-#resulting_sprite.save("sprite.png", "PNG")
-
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("> Usage: python atlas_to_png.py <file>")
