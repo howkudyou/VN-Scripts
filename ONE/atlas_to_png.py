@@ -1,4 +1,5 @@
 from PIL import Image, ImageDraw
+import json
 
 def rebuild_sprite(json_data, texture_path):
     canvas_width = json_data["Canvas"]["Width"]
@@ -6,16 +7,9 @@ def rebuild_sprite(json_data, texture_path):
     sprite = Image.new("RGBA", (canvas_width, canvas_height), (0, 0, 0, 0))
 
     for block in json_data["Block"]:
-        filename = block["filename"]
-        width = block["width"]
-        height = block["height"]
-        anchor_x = block["anchorX"]
-        anchor_y = block["anchorY"]
 
         for mesh in block["Mesh"]:
             tex_no = mesh["texNo"]
-            offset_x = mesh["offsetX"]
-            offset_y = mesh["offsetY"]
             src_offset_x = mesh["srcOffsetX"]
             src_offset_y = mesh["srcOffsetY"]
             tex_u1 = mesh["texU1"]
@@ -27,30 +21,19 @@ def rebuild_sprite(json_data, texture_path):
 
             texture = Image.open(texture_path).convert("RGBA")
 
-            mesh_width = texture.width
-            mesh_height = texture.height
+            cropped_texture = texture.crop((
+                round(tex_u1 * texture.width),
+                round(tex_v1 * texture.height),
+                round(tex_u2 * texture.width),
+                round(tex_v2 * texture.height)
+            ))
 
-            #print(f"Sprite dim: {sprite.size}, mode: {sprite.mode}")
-            #print(f"Texture dim: {texture.size}, mode: {texture.mode}")
-
-            offset = 100  # magic number, have to do tests
-
-            texture_no_alpha = texture.copy()
-            texture_no_alpha.putalpha(255)
-
-            sprite.paste(texture_no_alpha, (
-                round(block["offsetX"] + mesh["offsetX"]) - offset,
-                round(block["offsetY"] + mesh["offsetY"]) - offset,
-                round(block["offsetX"] + mesh["offsetX"] + mesh_width) - offset,
-                round(block["offsetY"] + mesh["offsetY"] + mesh_height) - offset
-            ), texture_no_alpha)
+            sprite.paste(cropped_texture, (round(src_offset_x), round(src_offset_y)), cropped_texture)
 
     return sprite
 
-
-json_data = {
-    "Canvas":{"Width":1920,"Height":1080},"Block":[{"filename":"BG010a","filenameOld":"BG010a","blend":"norm","id":0,"anchorX":0.0,"anchorY":0.0,"width":1920.0,"height":1080.0,"offsetX":0.0,"offsetY":0.0,"priority":0,"Mesh":[{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":0.0,"srcOffsetY":0.0,"texU1":0.00146484375,"texV1":0.00146484375,"texU2":0.12353515625,"texV2":0.12353515625,"viewX":3.0,"viewY":3.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":250.0,"srcOffsetY":0.0,"texU1":0.12646484375,"texV1":0.00146484375,"texU2":0.24853515625,"texV2":0.12353515625,"viewX":259.0,"viewY":3.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":500.0,"srcOffsetY":0.0,"texU1":0.25146484375,"texV1":0.00146484375,"texU2":0.37353515625,"texV2":0.12353515625,"viewX":515.0,"viewY":3.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":750.0,"srcOffsetY":0.0,"texU1":0.37646484375,"texV1":0.00146484375,"texU2":0.49853515625,"texV2":0.12353515625,"viewX":771.0,"viewY":3.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":1000.0,"srcOffsetY":0.0,"texU1":0.50146484375,"texV1":0.00146484375,"texU2":0.62353515625,"texV2":0.12353515625,"viewX":1027.0,"viewY":3.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":1250.0,"srcOffsetY":0.0,"texU1":0.62646484375,"texV1":0.00146484375,"texU2":0.74853515625,"texV2":0.12353515625,"viewX":1283.0,"viewY":3.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":1500.0,"srcOffsetY":0.0,"texU1":0.75146484375,"texV1":0.00146484375,"texU2":0.87353515625,"texV2":0.12353515625,"viewX":1539.0,"viewY":3.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":85.0,"offsetY":125.0,"srcOffsetX":1750.0,"srcOffsetY":0.0,"texU1":0.87646484375,"texV1":0.00146484375,"texU2":0.95947265625,"texV2":0.12353515625,"viewX":1795.0,"viewY":3.0,"width":170.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":0.0,"srcOffsetY":250.0,"texU1":0.00146484375,"texV1":0.12646484375,"texU2":0.12353515625,"texV2":0.24853515625,"viewX":3.0,"viewY":259.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":250.0,"srcOffsetY":250.0,"texU1":0.12646484375,"texV1":0.12646484375,"texU2":0.24853515625,"texV2":0.24853515625,"viewX":259.0,"viewY":259.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":500.0,"srcOffsetY":250.0,"texU1":0.25146484375,"texV1":0.12646484375,"texU2":0.37353515625,"texV2":0.24853515625,"viewX":515.0,"viewY":259.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":750.0,"srcOffsetY":250.0,"texU1":0.37646484375,"texV1":0.12646484375,"texU2":0.49853515625,"texV2":0.24853515625,"viewX":771.0,"viewY":259.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":1000.0,"srcOffsetY":250.0,"texU1":0.50146484375,"texV1":0.12646484375,"texU2":0.62353515625,"texV2":0.24853515625,"viewX":1027.0,"viewY":259.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":1250.0,"srcOffsetY":250.0,"texU1":0.62646484375,"texV1":0.12646484375,"texU2":0.74853515625,"texV2":0.24853515625,"viewX":1283.0,"viewY":259.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":1500.0,"srcOffsetY":250.0,"texU1":0.75146484375,"texV1":0.12646484375,"texU2":0.87353515625,"texV2":0.24853515625,"viewX":1539.0,"viewY":259.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":85.0,"offsetY":125.0,"srcOffsetX":1750.0,"srcOffsetY":250.0,"texU1":0.87646484375,"texV1":0.12646484375,"texU2":0.95947265625,"texV2":0.24853515625,"viewX":1795.0,"viewY":259.0,"width":170.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":0.0,"srcOffsetY":500.0,"texU1":0.00146484375,"texV1":0.25146484375,"texU2":0.12353515625,"texV2":0.37353515625,"viewX":3.0,"viewY":515.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":250.0,"srcOffsetY":500.0,"texU1":0.12646484375,"texV1":0.25146484375,"texU2":0.24853515625,"texV2":0.37353515625,"viewX":259.0,"viewY":515.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":500.0,"srcOffsetY":500.0,"texU1":0.25146484375,"texV1":0.25146484375,"texU2":0.37353515625,"texV2":0.37353515625,"viewX":515.0,"viewY":515.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":750.0,"srcOffsetY":500.0,"texU1":0.37646484375,"texV1":0.25146484375,"texU2":0.49853515625,"texV2":0.37353515625,"viewX":771.0,"viewY":515.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":1000.0,"srcOffsetY":500.0,"texU1":0.50146484375,"texV1":0.25146484375,"texU2":0.62353515625,"texV2":0.37353515625,"viewX":1027.0,"viewY":515.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":1250.0,"srcOffsetY":500.0,"texU1":0.62646484375,"texV1":0.25146484375,"texU2":0.74853515625,"texV2":0.37353515625,"viewX":1283.0,"viewY":515.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":1500.0,"srcOffsetY":500.0,"texU1":0.75146484375,"texV1":0.25146484375,"texU2":0.87353515625,"texV2":0.37353515625,"viewX":1539.0,"viewY":515.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":85.0,"offsetY":125.0,"srcOffsetX":1750.0,"srcOffsetY":500.0,"texU1":0.87646484375,"texV1":0.25146484375,"texU2":0.95947265625,"texV2":0.37353515625,"viewX":1795.0,"viewY":515.0,"width":170.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":0.0,"srcOffsetY":750.0,"texU1":0.00146484375,"texV1":0.37646484375,"texU2":0.12353515625,"texV2":0.49853515625,"viewX":3.0,"viewY":771.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":250.0,"srcOffsetY":750.0,"texU1":0.12646484375,"texV1":0.37646484375,"texU2":0.24853515625,"texV2":0.49853515625,"viewX":259.0,"viewY":771.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":500.0,"srcOffsetY":750.0,"texU1":0.25146484375,"texV1":0.37646484375,"texU2":0.37353515625,"texV2":0.49853515625,"viewX":515.0,"viewY":771.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":750.0,"srcOffsetY":750.0,"texU1":0.37646484375,"texV1":0.37646484375,"texU2":0.49853515625,"texV2":0.49853515625,"viewX":771.0,"viewY":771.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":1000.0,"srcOffsetY":750.0,"texU1":0.50146484375,"texV1":0.37646484375,"texU2":0.62353515625,"texV2":0.49853515625,"viewX":1027.0,"viewY":771.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":1250.0,"srcOffsetY":750.0,"texU1":0.62646484375,"texV1":0.37646484375,"texU2":0.74853515625,"texV2":0.49853515625,"viewX":1283.0,"viewY":771.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":125.0,"srcOffsetX":1500.0,"srcOffsetY":750.0,"texU1":0.75146484375,"texV1":0.37646484375,"texU2":0.87353515625,"texV2":0.49853515625,"viewX":1539.0,"viewY":771.0,"width":250.0,"height":250.0},{"texNo":0,"offsetX":85.0,"offsetY":125.0,"srcOffsetX":1750.0,"srcOffsetY":750.0,"texU1":0.87646484375,"texV1":0.37646484375,"texU2":0.95947265625,"texV2":0.49853515625,"viewX":1795.0,"viewY":771.0,"width":170.0,"height":250.0},{"texNo":0,"offsetX":125.0,"offsetY":40.0,"srcOffsetX":0.0,"srcOffsetY":1000.0,"texU1":0.00146484375,"texV1":0.50146484375,"texU2":0.12353515625,"texV2":0.54052734375,"viewX":3.0,"viewY":1027.0,"width":250.0,"height":80.0},{"texNo":0,"offsetX":125.0,"offsetY":40.0,"srcOffsetX":250.0,"srcOffsetY":1000.0,"texU1":0.12646484375,"texV1":0.50146484375,"texU2":0.24853515625,"texV2":0.54052734375,"viewX":259.0,"viewY":1027.0,"width":250.0,"height":80.0},{"texNo":0,"offsetX":125.0,"offsetY":40.0,"srcOffsetX":500.0,"srcOffsetY":1000.0,"texU1":0.25146484375,"texV1":0.50146484375,"texU2":0.37353515625,"texV2":0.54052734375,"viewX":515.0,"viewY":1027.0,"width":250.0,"height":80.0},{"texNo":0,"offsetX":125.0,"offsetY":40.0,"srcOffsetX":750.0,"srcOffsetY":1000.0,"texU1":0.37646484375,"texV1":0.50146484375,"texU2":0.49853515625,"texV2":0.54052734375,"viewX":771.0,"viewY":1027.0,"width":250.0,"height":80.0},{"texNo":0,"offsetX":125.0,"offsetY":40.0,"srcOffsetX":1000.0,"srcOffsetY":1000.0,"texU1":0.50146484375,"texV1":0.50146484375,"texU2":0.62353515625,"texV2":0.54052734375,"viewX":1027.0,"viewY":1027.0,"width":250.0,"height":80.0},{"texNo":0,"offsetX":125.0,"offsetY":40.0,"srcOffsetX":1250.0,"srcOffsetY":1000.0,"texU1":0.62646484375,"texV1":0.50146484375,"texU2":0.74853515625,"texV2":0.54052734375,"viewX":1283.0,"viewY":1027.0,"width":250.0,"height":80.0},{"texNo":0,"offsetX":125.0,"offsetY":40.0,"srcOffsetX":1500.0,"srcOffsetY":1000.0,"texU1":0.75146484375,"texV1":0.50146484375,"texU2":0.87353515625,"texV2":0.54052734375,"viewX":1539.0,"viewY":1027.0,"width":250.0,"height":80.0},{"texNo":0,"offsetX":85.0,"offsetY":40.0,"srcOffsetX":1750.0,"srcOffsetY":1000.0,"texU1":0.87646484375,"texV1":0.50146484375,"texU2":0.95947265625,"texV2":0.54052734375,"viewX":1795.0,"viewY":1027.0,"width":170.0,"height":80.0}],"Attribute":[{"id":-1,"x":0,"y":0,"width":0,"height":0,"color":0}]}]
-}
+with open(f'atlas.json', "r") as json_file:
+    json_data = json.load(json_file)
 
 resulting_sprite = rebuild_sprite(json_data, f"tex0.png")
 resulting_sprite.save("sprite.png", "PNG")
