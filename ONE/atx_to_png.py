@@ -3,6 +3,7 @@
 import sys
 import json
 import shutil
+from os import path
 from PIL import Image, ImageDraw
 from zipfile import ZipFile
 
@@ -24,7 +25,7 @@ def rebuild_sprite(json_data, texture_path):
             view_x = mesh["viewX"]
             view_y = mesh["viewY"]
 
-            texture = Image.open(texture_path).convert("RGBA")
+            texture = Image.open(texture_path.replace('[tex_no]', str(tex_no))).convert("RGBA")
 
             cropped_texture = texture.crop((
                 round(tex_u1 * texture.width),
@@ -46,7 +47,11 @@ if __name__ == "__main__":
         zip_ref.extractall('temp')
     with open(f'temp/atlas.json', "r") as json_file:
         json_data = json.load(json_file)
-    sprite = rebuild_sprite(json_data, f"temp/tex0.png")
+    if path.exists('temp/tex0.png'):
+        tex_path = f"temp/tex[tex_no].png"
+    else:
+        tex_path = f"temp/tex[tex_no].webp"
+    sprite = rebuild_sprite(json_data, tex_path)
     sprite.save(f'{file.replace(".atx", ".png")}', "PNG")
     shutil.rmtree('temp')
     print(f'> Reconstructed CG saved as {file.replace(".atx", ".png")}')
